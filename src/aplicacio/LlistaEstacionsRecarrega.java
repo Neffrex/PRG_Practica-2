@@ -1,5 +1,7 @@
 package aplicacio;
 
+import java.util.Arrays;
+
 import dades.*;
 
 public class LlistaEstacionsRecarrega {
@@ -39,8 +41,16 @@ public class LlistaEstacionsRecarrega {
 	 * 		boolean - true: s'han eliminat estacions; false: no s'ha eliminat cap estació
 	 */
 	public boolean eliminarEstacionsDePoblacioX (String poblacio) {
-		//TODO eliminarEstacionsDePoblacioX()
-		throw new UnsupportedOperationException("Not Implemented Yet");
+		int numInicial = nElem;
+		for (int i=0; i<nElem; i++){
+			if (llista[i].esTrobaEnAquestMunicipi(poblacio)){
+				nElem--;
+				for (int j=i; j<nElem; j++){
+					llista[j]=llista[j+1];
+				}
+			}
+		}
+		return (numInicial>nElem);
 	}
 	
 	
@@ -52,8 +62,22 @@ public class LlistaEstacionsRecarrega {
 	 * 		String[] - un vector amb les dades de les estacions, cada element del vector correspon a una estació
 	 */
 	public String[] dadesEstacionsDePoblacioX (String poblacio) {
-		//TODO dadesEstacionsDePoblacioX()
-		throw new UnsupportedOperationException("Not Implemented Yet");
+		
+		String[] dades;
+		int numDades=0;
+		for (int i=0; i<nElem; i++){
+			if (llista[i].esTrobaEnAquestMunicipi(poblacio)){
+				numDades++;
+			}
+		}
+		dades= new String[numDades];
+
+		for (int i=0, j=0; i<nElem; i++){
+			if (llista[i].esTrobaEnAquestMunicipi(poblacio)){
+				dades[j++] = llista[i].toString();
+			}
+		}
+		return dades;
 	}
 	
 	
@@ -65,8 +89,12 @@ public class LlistaEstacionsRecarrega {
 	 * 		EstacioRecarregaVE - la instància de la primera estació amb la provincia indicada
 	 */
 	public EstacioRecarregaVE primeraEstacioEnProvinciaX (String provincia) {
-		//TODO primeraEstacioEnProvinciaX()
-		throw new UnsupportedOperationException("Not Implemented Yet");
+		for (int i=0; i<nElem; i++){
+			if (llista[i].esTrobaEnAquestaProvincia(provincia)){
+				return llista[i].copia();
+			}
+		}
+		return null;
 	}
 	
 	
@@ -77,22 +105,29 @@ public class LlistaEstacionsRecarrega {
 	 * 	Retorna:
 	 * 		int - numero de estacions amb el tipus de velocitat indicada
 	 */
-	public int numEstacionsAmbVelocitatX (int velocitat) {
-		//TODO numEstacionsAmbVelocitatX()
-		throw new UnsupportedOperationException("Not Implemented Yet");
+	public int numEstacionsAmbVelocitatX (String velocitat) {
+		int num=0;
+		for (int i=0; i<nElem;i++){
+			if (llista[i].teAquestTipusRecarrega(velocitat)) num++;
+			// num += llista[i].teAquestTipusRecarrega(velocitat);
+		}
+		return num;
 	}
 	
 	
 	/*	6
-	 * 	Funció per obtenir la estació amb més places de capacitat
+	 * 	Funció per obtenir la estació amb més places de capacitat de la llista
 	 * 	Retorna:
 	 * 		EstacioRecarregaVE - la instància de la estació amb mes places de capacitat, en cas d'empat es retorna la primera intancia de les empatades
 	 */
 	public EstacioRecarregaVE majorNumPlaces () {
-		//TODO majorNumPlaces()
-		throw new UnsupportedOperationException("Not Implemented Yet");
+		EstacioRecarregaVE estacioMesPlaces = llista[0];
+		for (int i=1; i<nElem; i++)
+			if (llista[i].getNumPlaces() > estacioMesPlaces.getNumPlaces())
+				estacioMesPlaces = llista[i];
+		return estacioMesPlaces;
 	}
-	
+
 	
 	/*	7
 	 * 	Funció per obtenir un duplicat de la estació més propera a una posició
@@ -101,9 +136,19 @@ public class LlistaEstacionsRecarrega {
 	 * 	Retorna:
 	 * 		EstacioRecarregaVE - la instància de la estació amb mes places de capacitat, en cas d'empat es retorna la primera intancia de les empatades
 	 */
-	public EstacioRecarregaVE estacioMesProperaAPosicioX (float posicio) {
-		//TODO estacioMesPropera()
-		throw new UnsupportedOperationException("Not Implemented Yet");
+	public EstacioRecarregaVE estacioMesProperaAPosicioX (float latitud, float longitud) {
+		
+		EstacioRecarregaVE estacioMesPropera = llista[0];
+		double distanciaMenor = llista[0].distanciaA(latitud, longitud);
+		
+		for (int i=0; i<nElem; i++) {
+			double distancia = llista[i].distanciaA(latitud, longitud);
+			if (distancia < distanciaMenor) {
+				estacioMesPropera = llista[i];
+				distanciaMenor = distancia;
+			}
+		}
+		return estacioMesPropera;
 	}
 	
 	
@@ -114,10 +159,47 @@ public class LlistaEstacionsRecarrega {
 	 * 	Retorna:
 	 * 		EstacioRecarregaVE[] - vector amb totes les estacions properes a la posició indicada
 	 */
-	public EstacioRecarregaVE[] estacionsProperesAPosicioX (float posicio) {
-		//TODO estacionsProperesAPosicioX()
-		throw new UnsupportedOperationException("Not Implemented Yet");
+	public EstacioRecarregaVE[] estacionsProperesAPosicioX (float latitud, float longitud) {
+		EstacioRecarregaVE[] llistaPropers = new EstacioRecarregaVE[nElem];
+		for (int i=0, j=0; i<nElem; i++) {
+			if (llista[i].distanciaA(latitud, longitud) < distanciaMaxEstacioPropera) {
+				llistaPropers[j++] = llista[i];
+			}
+		}
+		return llistaPropers;
 	}
 	
+	public LlistaEstacionsRecarrega duplicat() {
+		LlistaEstacionsRecarrega duplicat = new LlistaEstacionsRecarrega(llista.length);
+		for (int i = 0; i<this.nElem; i++) 
+			duplicat.afegirEstacio(llista[i]);
+		return duplicat;
+	}
+	
+	@Override
+	public String toString() {
+		return "[" + Arrays.toString(llista) + "]";
+	}
+	
+	/*	Getters & Setters*/
+
+	public EstacioRecarregaVE[] getLlista() {
+		return llista;
+	}
+
+
+	public int getnElem() {
+		return nElem;
+	}
+
+
+	public static int getDistanciaMaxEstacioPropera() {
+		return distanciaMaxEstacioPropera;
+	}
+
+
+	public static void setDistanciaMaxEstacioPropera(int distanciaMaxEstacioPropera) {
+		LlistaEstacionsRecarrega.distanciaMaxEstacioPropera = distanciaMaxEstacioPropera;
+	}
 	
 }
