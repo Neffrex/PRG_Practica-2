@@ -133,7 +133,8 @@ public class LlistaEstacionsRecarrega {
 	/*	7
 	 * 	Funció per obtenir un duplicat de la estació més propera a una posició
 	 *	Param:
-	 *		posicio - posició de la qual es determina si la estació es propera o no 
+	 *		latitud - latitud de la posició
+	 *		longitud - longitud de la posició
 	 * 	Retorna:
 	 * 		EstacioRecarregaVE - la instància de la estació amb mes places de capacitat, en cas d'empat es retorna la primera intancia de les empatades
 	 */
@@ -156,18 +157,25 @@ public class LlistaEstacionsRecarrega {
 	/*	9
 	 * 	Funció per obtenir un vector amb les estacions properes a una posició
 	 *	Param:
-	 *		posicio - posició de la qual es determina si la estació es propera o no 
+	 *		latitud - latitud de la posició
+	 *		longitud - longitud de la posició
 	 * 	Retorna:
-	 * 		EstacioRecarregaVE[] - vector amb totes les estacions properes a la posició indicada
+	 * 		LlistaEstacionsRecarrega - llista amb totes les estacions properes a la posició indicada
 	 */
-	public EstacioRecarregaVE[] estacionsProperesAPosicioX (float latitud, float longitud) {
-		EstacioRecarregaVE[] llistaPropers = new EstacioRecarregaVE[nElem];
-		for (int i=0, j=0; i<nElem; i++) {
-			if (llista[i].distanciaA(latitud, longitud) < distanciaMaxEstacioPropera) {
-				llistaPropers[j++] = llista[i];
-			}
-		}
+	public LlistaEstacionsRecarrega estacionsProperesAPosicioX (float latitud, float longitud) {
+		LlistaEstacionsRecarrega llistaPropers = new LlistaEstacionsRecarrega(nElem);
+		for (int i=0; i<nElem; i++)
+			if (llista[i].distanciaA(latitud, longitud) < distanciaMaxEstacioPropera)
+				llistaPropers.afegirEstacio(llista[i]);
 		return llistaPropers;
+	}
+	
+	public EstacioRecarregaVE get(int i) {
+		return (i<=nElem && llista[i]!=null)?llista[i]:null;
+	}
+	
+	public boolean esBuida() {
+		return (nElem == 0);
 	}
 	
 	public LlistaEstacionsRecarrega duplicat() {
@@ -179,25 +187,16 @@ public class LlistaEstacionsRecarrega {
 	
 	@Override
 	public String toString() {
-		return "[" + Arrays.toString(llista) + "]";
+		String buffer = "LlistaEstacionsRecarrega =>";
+		for(int i=0; i<nElem; i++)
+			buffer += "\n\t"+llista[i].toString();
+		return buffer;
 	}
 	
-	/*	Getters & Setters*/
 
-	public EstacioRecarregaVE[] getLlista() {
-		return llista;
-	}
-
-
-	public int getnElem() {
-		return nElem;
-	}
-
-
-	public static int getDistanciaMaxEstacioPropera() {
-		return distanciaMaxEstacioPropera;
-	}
-
+	public EstacioRecarregaVE[] getLlista() {return llista;}
+	public int getnElem() {return nElem;}
+	public static int getDistanciaMaxEstacioPropera() {return distanciaMaxEstacioPropera;}
 
 	public static void setDistanciaMaxEstacioPropera(int distanciaMaxEstacioPropera) {
 		LlistaEstacionsRecarrega.distanciaMaxEstacioPropera = distanciaMaxEstacioPropera;

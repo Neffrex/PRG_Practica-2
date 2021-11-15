@@ -5,8 +5,6 @@ import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.Scanner;
 
-import org.jcp.xml.dsig.internal.SignerOutputStream;
-
 import dades.*;
 
 public class UsaLlistaEstacionsVE {
@@ -17,7 +15,8 @@ public class UsaLlistaEstacionsVE {
 		int numLinies = Integer.parseInt(teclat.nextLine()), numEstacionsPropers=0, altitud=0, longitud=0;
 		String[] dataset = llegirLiniesFitxer(numLinies);
 		String buffer;
-		EstacioRecarregaVE estacionsProperes[] = null, estacioAmbMesPlaces = null, llistaPropers[] = null, bufferEstacio;
+		LlistaEstacionsRecarrega llistaEstacionsProperes = null;
+		EstacioRecarregaVE estacionsProperes[] = null, estacioAmbMesPlaces = null, bufferEstacio;
 		byte opcio=0;
 		boolean end=false;
 		
@@ -25,28 +24,10 @@ public class UsaLlistaEstacionsVE {
 			System.out.println("Linia " + (i + 1) + " conté " + dataset[i]);
 		}
 
-		// Completar el codi a partir d'aquí
 		LlistaEstacionsRecarrega llista = new LlistaEstacionsRecarrega(dataset.length);
-		System.out.println("Carregant dades...");
-		for(int i=0; i<dataset.length; i++) {
-			String s = dataset[i];
-			s = s.replace(',', '.');
-			String[] elem = s.split(";");
-			String[] velocitats = elem[1].split(" i ");
-			
-			llista.afegirEstacio(new EstacioRecarregaVE(
-					elem[0],
-					velocitats[0],
-					Float.parseFloat(elem[2]),
-					Float.parseFloat(elem[3]),
-					elem[4],
-					elem[5],
-					Integer.parseInt(elem[6])));
-			
-			for (int j=1; j<velocitats.length; j++)
-				llista.getLlista()[i].afegirTipusVelocitat(velocitats[j]);
-		}
 		
+		System.out.println("Carregant dades...");
+		carregar_dades(llista, dataset);
 		System.out.println("Dades carregades i llestes per usar-se");
 		
 		Scanner teclat = new Scanner(System.in);
@@ -56,129 +37,133 @@ public class UsaLlistaEstacionsVE {
 			System.out.println("**********************************************************************");
 			System.out.println("Menu de l'aplicació EstacióRecàrregaVE");
 			System.out.println("Escull l'opció que vols usar, per seleccionar-ne un introdueix el número corresponent i pressiona Enter.");
-			System.out.println("01- Eliminar conjunt d'estacions en una població.");
-			System.out.println("02- Mostrar primera estació ubicada a la província de Lleida i Barcelona.");
-			System.out.println("03- Mostrar número d'estacions que disposen de punts de recàrrega d'un tipus de velocitat.");
-			System.out.println("04- Mostrar l’estació que té més places de capacitat.");
-			System.out.println("05- Mostrar l’estació més propera a la nostra posició.");
-			System.out.println("06- Mostrar les dades de les estacions que es troben properes a la nostra posició");
-			System.out.println("07- Amplia el valor de distància propera a 50 km");
-			System.out.println("08- Del  resultat  de  les  estacions  properes  mostra  les  dades  de  l’estació  que  té  més  places  de capacitat.");
-			System.out.println("09- Mostrar el conjunt d’estacions de la llista.");
+			System.out.println(" 1- Eliminar conjunt d'estacions en una població.");
+			System.out.println(" 2- Mostrar primera estació ubicada a la província de Lleida i Barcelona.");
+			System.out.println(" 3- Mostrar número d'estacions que disposen de punts de recàrrega d'un tipus de velocitat.");
+			System.out.println(" 4- Mostrar l’estació que té més places de capacitat.");
+			System.out.println(" 5- Mostrar l’estació més propera a la nostra posició.");
+			System.out.println(" 6- Mostrar les dades de les estacions que es troben properes a la nostra posició");
+			System.out.println(" 7- Amplia el valor de distància propera a 50 km");
+			System.out.println(" 8- Del  resultat  de  les  estacions  properes  mostra  les  dades  de  l’estació  que  té  més  places  de capacitat.");
+			System.out.println(" 9- Mostrar el conjunt d’estacions de la llista.");
 			System.out.println("10- Sortir del programa.");
+			System.out.println("**********************************************************************");
 			
-			opcio = teclat.nextByte();
-			
-			System.out.println("**********************************************************************\n");
-			System.out.println("Executant opció " + opcio);
-			
-			switch(opcio){
-
-			case 1:
-				System.out.println("Poblacio del conjunt a eliminar: ");
-				teclat.nextLine();
-				buffer = teclat.nextLine();
-				System.out.println((llista.eliminarEstacionsDePoblacioX(buffer)?"Estacions eliminades amb exit":"No s'ha fet cap eliminació"));
-				break;
-			case 2:
-				bufferEstacio = llista.primeraEstacioEnProvinciaX("Lleida");
-				System.out.println((bufferEstacio!=null)?bufferEstacio.toString():"No hi ha cap estació en Lleida");
-				bufferEstacio = llista.primeraEstacioEnProvinciaX("Barcelona");
-				System.out.println((bufferEstacio!=null)?bufferEstacio.toString():"No hi ha cap estació en Lleida");
-				break;
-			case 3:
-				System.out.println("Tipus de velocitat: ");
-				teclat.nextLine();
-				buffer = teclat.nextLine();
-				System.out.println("Hi han " + llista.numEstacionsAmbVelocitatX(buffer) + " estacions amb velocitat " + buffer + ".\n");
-				break;
-			case 4:
-				if (llista==null){
-					System.out.println("La llista està buida.");
-				}
-				else{
-					if (estacionsProperes==null){
-						System.out.println("No hi ha cap estació propera.");
-						break;
-					}
-					estacioAmbMesPlaces=llista.getLlista()[0];
-					for (int i=1; i<estacionsProperes.length; i++){
-						if (llista.getLlista()[i].getNumPlaces()>estacioAmbMesPlaces.getNumPlaces()){
-							estacioAmbMesPlaces = llista.getLlista()[i];
-						}
-					}
-					System.out.println(estacioAmbMesPlaces.toString());
-				}
-				break;
-			case 5:
-				System.out.println("Introdueix la altitud:");
-				altitud=teclat.nextInt();
-				System.out.println("Intrudueix la longitud:");
-				longitud=teclat.nextInt();
-				System.out.println(llista.estacioMesProperaAPosicioX(altitud, longitud).toString());
-				break;
-			case 6:
-				System.out.println("Introdueix la altitud:");
-				altitud=teclat.nextInt();
-				System.out.println("Intrudueix la longitud:");
-				longitud=teclat.nextInt();
-				llistaPropers = llista.estacionsProperesAPosicioX(altitud, longitud);
-				System.out.println(Arrays.toString(llistaPropers));
-				for (EstacioRecarregaVE s: llistaPropers){
-					if (s == null) {
-						System.out.println("No hi han més estacions properes");
-						break;
-					}
-				}
-				break;
-			case 7:
-				LlistaEstacionsRecarrega.setDistanciaMaxEstacioPropera(50);
-				System.out.println("Afegir 50km fet.");
-				llistaPropers = llista.estacionsProperesAPosicioX(altitud, longitud);
-				break;
-			case 8:
-				if (estacionsProperes==null){
-					System.out.println("No hi ha cap estació propera.");
-					break;
-				}
-				estacioAmbMesPlaces = estacionsProperes[0];
-				for (int i=1; i<estacionsProperes.length; i++){
-					if (llista.getLlista()[i].getNumPlaces()>estacioAmbMesPlaces.getNumPlaces()){
-						estacioAmbMesPlaces = llista.getLlista()[i];
-					}
-				}
-				System.out.println(estacioAmbMesPlaces.toString()); 
-				
-				break;
-			case 9:
-				System.out.println("Mostrant el conjunt d'estacions:");
-				for (int i=0; i<llista.getnElem(); i++){
-					System.out.println(llista.getLlista()[i].toString());
-				}
-				break;
-			case 10:
-				System.out.println("Sortint del programa...");
-				end = true;
-				//return;
-				break;
-			default:
-				System.out.println("Introdueix un valor vàlid. :(");	
-				break;
-				
-			}
-			
-			// 4 segundos de tiempo para ver la respuesta de la opcion
 			try {
-				Thread.sleep(2000);
-			} catch (InterruptedException e) {
+				
+				System.out.println("Selecciona una opció: ");
+				opcio = Byte.parseByte(teclat.nextLine());
+				
+				System.out.println("Executant opció " + opcio);
+				
+				switch(opcio){
+					case 1:
+						System.out.println("Poblacio del conjunt a eliminar: ");
+						buffer = teclat.nextLine();
+						System.out.println((llista.eliminarEstacionsDePoblacioX(buffer)?"Estacions eliminades amb exit":"No s'ha fet cap eliminació"));
+						break;
+						
+					case 2:
+						bufferEstacio = llista.primeraEstacioEnProvinciaX("Lleida");
+						System.out.println((bufferEstacio!=null)?bufferEstacio.toString():"No hi ha cap estació en Lleida");
+						bufferEstacio = llista.primeraEstacioEnProvinciaX("Barcelona");
+						System.out.println((bufferEstacio!=null)?bufferEstacio.toString():"No hi ha cap estació en Lleida");
+						break;
+						
+					case 3:
+						System.out.println("Tipus de velocitat: ");
+						buffer = teclat.nextLine();
+						System.out.println("Hi han " + llista.numEstacionsAmbVelocitatX(buffer) + " estacions amb velocitat " + buffer + ".\n");
+						break;
+						
+					case 4:
+						if (llista==null){
+							System.out.println("La llista està buida.");
+						} else if (estacionsProperes==null){
+							System.out.println("No hi ha cap estació propera.");
+						} else {
+							System.out.println(llista.majorNumPlaces().toString());
+						}
+						break;
+						
+					case 5:
+						System.out.println("Introdueix la altitud:");
+						altitud=Integer.parseInt(teclat.nextLine());
+						System.out.println("Intrudueix la longitud:");
+						longitud=Integer.parseInt(teclat.nextLine());
+						System.out.println(llista.estacioMesProperaAPosicioX(altitud, longitud).toString());
+						break;
+						
+					case 6:
+						System.out.println("Introdueix la altitud:");
+						altitud=teclat.nextInt();
+						System.out.println("Intrudueix la longitud:");
+						longitud=teclat.nextInt();
+						System.out.println("El rang de proximitat actual es: " + LlistaEstacionsRecarrega.getDistanciaMaxEstacioPropera());
+						
+						System.out.println(llista.estacionsProperesAPosicioX(altitud, longitud).toString());
+						break;
+						
+					case 7:
+						if(LlistaEstacionsRecarrega.getDistanciaMaxEstacioPropera() != 50) {
+							LlistaEstacionsRecarrega.setDistanciaMaxEstacioPropera(50);
+							System.out.println("Rang augmentat a 50km");
+						}
+						
+						System.out.println("Introdueix la altitud:");
+						altitud=teclat.nextInt();
+						System.out.println("Intrudueix la longitud:");
+						longitud=teclat.nextInt();
+						System.out.println("El rang de proximitat actual es: " + LlistaEstacionsRecarrega.getDistanciaMaxEstacioPropera());
+						
+						llistaEstacionsProperes = llista.estacionsProperesAPosicioX(altitud, longitud);
+						System.out.println(estacionsProperes.toString());
+						break;
+						
+					case 8:
+						if (llistaEstacionsProperes.esBuida()){
+							System.out.println("No hi ha cap estació propera.");
+						} else {
+							System.out.println(llistaEstacionsProperes.majorNumPlaces().toString()); 
+						}
+						break;
+						
+					case 9:
+						System.out.println(llista.toString());
+						break;
+						
+					case 10:
+						System.out.println("Sortint del programa...");
+						end = true;
+						break;
+						
+					default:
+						System.out.println("Introdueix un valor vàlid.");
+						break;
+				}
+
+				waitForResponse("Prem ENTER per continuar... ");
+				
+			} catch(NumberFormatException e) {
+				// Formato incorrecto al introducir un dato
+				System.err.println("ERROR: El valor introduit no es un valor vàlid");
+				waitForResponse("Prem ENTER per continuar... ");
+			} catch (Exception e) {
 				e.printStackTrace();
+				System.exit(-1);
 			}
-			
+
 		}
 		
 		teclat.close();
-		new Menu(llista);
 		
+	}
+	
+	private static void waitForResponse() {
+		teclat.nextLine();
+	}
+	private static void waitForResponse(String msg) {
+		System.out.println(msg); teclat.nextLine();
 	}
 	
 	private static String[] llegirLiniesFitxer(int nLinies) throws FileNotFoundException {
@@ -197,6 +182,29 @@ public class UsaLlistaEstacionsVE {
 		}
 		f.close();
 		return result;
+	}
+	
+	private static void carregar_dades(LlistaEstacionsRecarrega llistaEstacions, String[] dataset) {
+		
+		for(int i=0; i<dataset.length; i++) {
+			String s = dataset[i];
+			s = s.replace(',', '.');
+			String[] dadesEstacio = s.split(";");
+			String[] velocitats = dadesEstacio[1].split(" i ");
+			
+			llistaEstacions.afegirEstacio(new EstacioRecarregaVE(
+					dadesEstacio[0],
+					velocitats[0],
+					Float.parseFloat(dadesEstacio[2]),
+					Float.parseFloat(dadesEstacio[3]),
+					dadesEstacio[4],
+					dadesEstacio[5],
+					Integer.parseInt(dadesEstacio[6])));
+			
+			for (int j=1; j<velocitats.length; j++)
+				llistaEstacions.getLlista()[i].afegirTipusVelocitat(velocitats[j]);
+		}
+		
 	}
 	
 	private static class Menu extends javax.swing.JFrame {
