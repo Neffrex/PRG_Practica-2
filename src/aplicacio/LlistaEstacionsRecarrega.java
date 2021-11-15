@@ -48,6 +48,7 @@ public class LlistaEstacionsRecarrega {
 				for (int j=i; j<nElem; j++){
 					llista[j]=llista[j+1];
 				}
+			i--;
 			}
 		}
 		return (numInicial>nElem);

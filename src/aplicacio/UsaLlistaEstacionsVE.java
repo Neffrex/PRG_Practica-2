@@ -17,7 +17,7 @@ public class UsaLlistaEstacionsVE {
 		int numLinies = Integer.parseInt(teclat.nextLine()), numEstacionsPropers=0, altitud=0, longitud=0;
 		String[] dataset = llegirLiniesFitxer(numLinies);
 		String buffer;
-		EstacioRecarregaVE estacionsProperes[] = null, estacioAmbMesPlaces = null, llistaPropers[] = null;
+		EstacioRecarregaVE estacionsProperes[] = null, estacioAmbMesPlaces = null, llistaPropers[] = null, bufferEstacio;
 		byte opcio=0;
 		boolean end=false;
 		
@@ -28,17 +28,23 @@ public class UsaLlistaEstacionsVE {
 		// Completar el codi a partir d'aquí
 		LlistaEstacionsRecarrega llista = new LlistaEstacionsRecarrega(dataset.length);
 		System.out.println("Carregant dades...");
-		for(String s : dataset) {
+		for(int i=0; i<dataset.length; i++) {
+			String s = dataset[i];
 			s = s.replace(',', '.');
 			String[] elem = s.split(";");
+			String[] velocitats = elem[1].split(" i ");
+			
 			llista.afegirEstacio(new EstacioRecarregaVE(
 					elem[0],
-					elem[1],
+					velocitats[0],
 					Float.parseFloat(elem[2]),
 					Float.parseFloat(elem[3]),
 					elem[4],
 					elem[5],
 					Integer.parseInt(elem[6])));
+			
+			for (int j=1; j<velocitats.length; j++)
+				llista.getLlista()[i].afegirTipusVelocitat(velocitats[j]);
 		}
 		
 		System.out.println("Dades carregades i llestes per usar-se");
@@ -69,15 +75,22 @@ public class UsaLlistaEstacionsVE {
 			switch(opcio){
 
 			case 1:
-				System.out.println("Poblacio del conjunt a eliminar: " + (llista.eliminarEstacionsDePoblacioX(teclat.nextLine())?"exit":"error"));
+				System.out.println("Poblacio del conjunt a eliminar: ");
+				teclat.nextLine();
+				buffer = teclat.nextLine();
+				System.out.println((llista.eliminarEstacionsDePoblacioX(buffer)?"Estacions eliminades amb exit":"No s'ha fet cap eliminació"));
 				break;
 			case 2:
-				System.out.println(llista.primeraEstacioEnProvinciaX("Lleida").toString() + llista.primeraEstacioEnProvinciaX("Barcelona").toString());
+				bufferEstacio = llista.primeraEstacioEnProvinciaX("Lleida");
+				System.out.println((bufferEstacio!=null)?bufferEstacio.toString():"No hi ha cap estació en Lleida");
+				bufferEstacio = llista.primeraEstacioEnProvinciaX("Barcelona");
+				System.out.println((bufferEstacio!=null)?bufferEstacio.toString():"No hi ha cap estació en Lleida");
 				break;
 			case 3:
 				System.out.println("Tipus de velocitat: ");
+				teclat.nextLine();
 				buffer = teclat.nextLine();
-				System.out.println("Hi ha ");
+				System.out.println("Hi han " + llista.numEstacionsAmbVelocitatX(buffer) + " estacions amb velocitat " + buffer + ".\n");
 				break;
 			case 4:
 				if (llista==null){
@@ -146,6 +159,7 @@ public class UsaLlistaEstacionsVE {
 			case 10:
 				System.out.println("Sortint del programa...");
 				end = true;
+				//return;
 				break;
 			default:
 				System.out.println("Introdueix un valor vàlid. :(");	
@@ -155,7 +169,7 @@ public class UsaLlistaEstacionsVE {
 			
 			// 4 segundos de tiempo para ver la respuesta de la opcion
 			try {
-				Thread.sleep(4000);
+				Thread.sleep(2000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -163,7 +177,7 @@ public class UsaLlistaEstacionsVE {
 		}
 		
 		teclat.close();
-		//new Menu(llista);
+		new Menu(llista);
 		
 	}
 	
